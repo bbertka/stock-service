@@ -5,7 +5,7 @@ include:
 stages:
   - test
 
-test-override:  # Because the herokuish buildpacks doesnt support Python Testing
+test-override:  # The herokuish buildpacks doesnt support Python Testing
   stage: test
   image: python:3.8
   script:
