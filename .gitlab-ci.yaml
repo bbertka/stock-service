@@ -8,6 +8,7 @@ stages:
   - deploy
   - review
   - dast
+  - release
   - staging
   - canary
   - production
@@ -29,3 +30,61 @@ test-override:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
+
+dockerhub-amd64:
+  stage: release
+  image: docker:latest
+  services:
+    - name: docker:dind
+      alias: docker
+  variables:
+    DOCKER_REGISTRY: "docker.io"
+    DOCKER_CLI_EXPERIMENTAL: "enabled"
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_IMAGE_NAME: "bbertka/stock-flask-app"
+    DOCKER_BASE_TAG: "latest"
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $DOCKER_REGISTRY --password-stdin
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker buildx create --use
+  script:
+    - >
+      docker buildx build
+      --platform linux/amd64
+      -t $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$DOCKER_BASE_TAG
+      -f $DOCKER_FILE
+      --push .
+  only:
+    - main
+  needs:
+    - job: dast
+      optional: false
+
+dockerhub-arm64:
+  stage: release
+  image: docker:latest
+  services:
+    - name: docker:dind
+      alias: docker
+  variables:
+    DOCKER_REGISTRY: "docker.io"
+    DOCKER_CLI_EXPERIMENTAL: "enabled"
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_IMAGE_NAME: "bbertka/stock-flask-app"
+    DOCKER_BASE_TAG: "latest-arm64"
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $DOCKER_REGISTRY --password-stdin
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker buildx create --use
+  script:
+    - >
+      docker buildx build
+      --platform linux/arm64
+      -t $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$DOCKER_BASE_TAG
+      -f $DOCKER_FILE
+      --push .
+  only:
+    - main
+  needs:
+    - job: dast
+      optional: false
