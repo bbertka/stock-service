@@ -19,8 +19,8 @@ stages:
   - cleanup
 
 
-test:  # The herokuish buildpacks doesnt support Python Testing
-  stage: test-ci
+test-ci:  # The herokuish buildpacks doesnt support Python Testing
+  stage: test
   image: python:3.8
   script:
     - echo "Running custom tests"
