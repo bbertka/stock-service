@@ -41,7 +41,7 @@ def stock_price():
 
 @app.route('/')
 def home():
-    return "Welcome!"
+    return "Hello GitLab!"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
