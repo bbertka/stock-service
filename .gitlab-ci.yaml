@@ -28,5 +28,5 @@ test-cases:  # The herokuish buildpacks doesnt support Python Testing
     - pip install -r requirements.txt
     - pytest  tests/test-app.py
   rules:
-    - if: '$CI_COMMIT_BRANCH != "main"'
-      when: never
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
