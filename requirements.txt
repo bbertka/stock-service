@@ -1,2 +1,4 @@
 yfinance
 Flask
+pytest
+Flask-Testing
