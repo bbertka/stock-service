@@ -12,7 +12,7 @@ class TestStockService(TestCase):
         # Test the home endpoint
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Welcome!", response.data)
+        self.assertIn(b"Hello GitLab!", response.data)
 
     def test_stock_price_success(self):
         # Test the stock price endpoint with a known symbol
