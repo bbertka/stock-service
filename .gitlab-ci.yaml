@@ -5,7 +5,7 @@ include:
 stages:
   - build
   - test
-  - deploy  # dummy stage to follow the template guidelines
+  - deploy
   - review
   - dast
   - staging
@@ -18,8 +18,7 @@ stages:
   - performance
   - cleanup
 
-
-test-override:  # The herokuish buildpacks doesnt support Python Testing
+test-override:
   stage: test
   image: python:3.8
   script:
