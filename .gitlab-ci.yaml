@@ -19,10 +19,11 @@ stages:
   - cleanup
 
 
-test-ci:  # The herokuish buildpacks doesnt support Python Testing
+test-override:  # The herokuish buildpacks doesnt support Python Testing
   stage: test
   image: python:3.8
   script:
+    - export PYTHONPATH=$PYTHONPATH:$(pwd)
     - echo "Running custom tests"
     - pip install -r requirements.txt
     - pytest  tests/test-app.py
