@@ -1,0 +1,14 @@
+
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+
+stages:
+  - test
+
+test-cases:  # The herokuish buildpacks doesnt support Python Testing
+  stage: test
+  image: python:3.8
+  script:
+    - echo "Running custom tests"
+    - pip install -r requirements.txt
+    - pytest  tests/test-app.py
