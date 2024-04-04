@@ -3,7 +3,6 @@ include:
   - template: Auto-DevOps.gitlab-ci.yml
 
 stages:
-  - test-ci
   - build
   - test
   - deploy  # dummy stage to follow the template guidelines
@@ -20,7 +19,7 @@ stages:
   - cleanup
 
 
-test-cases:  # The herokuish buildpacks doesnt support Python Testing
+test:  # The herokuish buildpacks doesnt support Python Testing
   stage: test-ci
   image: python:3.8
   script:
