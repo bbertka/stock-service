@@ -1,0 +1,7 @@
+gitops:
+  manifest_projects:
+  - id: "sa-demo-group/ben-bertka-demo-group/stock-service"
+    paths:
+    - glob: '/**/*.{yaml,yml,json}'
+  ci_cd:
+    enabled: true
