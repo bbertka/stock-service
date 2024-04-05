@@ -41,7 +41,7 @@ dockerhub-amd64:
     DOCKER_REGISTRY: "docker.io"
     DOCKER_CLI_EXPERIMENTAL: "enabled"
     DOCKER_HOST: tcp://docker:2375
-    DOCKER_IMAGE_NAME: "bbertka/stock-flask-app"
+    DOCKER_IMAGE_NAME: "$DOCKER_USERNAME/stock-flask-app"
     DOCKER_BASE_TAG: "latest"
     DOCKER_FILE: "Dockerfile"
   before_script:
@@ -71,7 +71,7 @@ dockerhub-arm64:
     DOCKER_REGISTRY: "docker.io"
     DOCKER_CLI_EXPERIMENTAL: "enabled"
     DOCKER_HOST: tcp://docker:2375
-    DOCKER_IMAGE_NAME: "bbertka/stock-flask-app"
+    DOCKER_IMAGE_NAME: "$DOCKER_USERNAME/stock-flask-app"
     DOCKER_BASE_TAG: "latest-arm64"
     DOCKER_FILE: "Dockerfile"
   before_script:
@@ -98,8 +98,8 @@ push_to_github:
   script:
     - git config --global user.email "$GITHUB_EMAIL"
     - git config --global user.name "$GITHUB_USER"
-    - git remote add github https://github.com/${GITHUB_USER}/repo.git
-    - git push https://${GITHUB_TOKEN}@github.com/${GITHUB_USER}/repo.git HEAD:main
+    - git remote add github https://github.com/${GITHUB_USER}/stock-service.git
+    - git push https://${GITHUB_TOKEN}@github.com/${GITHUB_USER}/stock-service.git HEAD:main
   only:
     - main
   needs:
