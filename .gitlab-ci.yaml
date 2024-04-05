@@ -90,3 +90,18 @@ dockerhub-arm64:
   needs:
     - job: dast
       optional: false
+
+
+push_to_github:
+  stage: release
+  image: alpine/git  # Using an Alpine image with Git installed
+  script:
+    - git config --global user.email "$GITHUB_EMAIL"
+    - git config --global user.name "$GITHUB_USER"
+    - git remote add github https://github.com/${GITHUB_USER}/repo.git
+    - git push https://${GITHUB_TOKEN}@github.com/${GITHUB_USER}/repo.git HEAD:main
+  only:
+    - main
+  needs:
+    - job: dast
+      optional: false
