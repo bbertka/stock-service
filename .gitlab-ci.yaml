@@ -90,22 +90,3 @@ dockerhub-arm64:
   needs:
     - job: dast
       optional: false
-
-
-push_to_github:
-  stage: release
-  image: alpine/git  # Using an Alpine image with Git installed
-  script:
-    - apk add --no-cache git
-    - git config --global user.email "$GITHUB_EMAIL"
-    - git config --global user.name "$GITHUB_USER"
-    # Ensure the full git history is available for the push
-    - git fetch --unshallow || true  # The || true ensures that if this repo was already a full clone, the script doesn't fail
-    - git remote add github https://github.com/${GITHUB_USER}/stock-service.git
-    # Push the current branch to the 'main' branch on GitHub
-    - git push https://${GITHUB_TOKEN}@github.com/${GITHUB_USER}/stock-service.git HEAD:main
-  only:
-    - main
-  needs:
-    - job: dast
-      optional: false
