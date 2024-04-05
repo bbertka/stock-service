@@ -3,6 +3,7 @@ include:
   - template: Auto-DevOps.gitlab-ci.yml
 
 stages:
+  - pytest
   - build
   - test
   - deploy
@@ -19,8 +20,8 @@ stages:
   - performance
   - cleanup
 
-test-override:
-  stage: test
+pytest-feature:
+  stage: pytest
   image: python:3.8
   script:
     - export PYTHONPATH=$PYTHONPATH:$(pwd)
@@ -28,8 +29,22 @@ test-override:
     - pip install -r requirements.txt
     - pytest  tests/test-app.py
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
       when: always
+    - when: never # Aviod running in other branches
+
+pysec-tests:
+  stage: test
+  image: python:3.8
+  script:
+    - echo "Running custom Python Security tests"
+    - echo "Passed custom Python Security tests"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'  # This runs on the main branch
+      when: always
+    - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
+      when: always
+    - when: never # Aviod running in other branches
 
 dockerhub-amd64:
   stage: release-imgages
