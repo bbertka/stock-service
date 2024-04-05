@@ -9,6 +9,7 @@ stages:
   - review
   - dast
   - staging
+  - canary
   - release-img
   - production
   - performance
