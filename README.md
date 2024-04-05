@@ -1,6 +1,6 @@
 # Stock Service
 
-
+[![pipeline status](https://gitlab.com/sa-demo-group/ben-bertka-demo-group/stock-service/badges/main/pipeline.svg)](https://gitlab.com/sa-demo-group/ben-bertka-demo-group/stock-service/-/commits/main)
 
 ## Getting started
 

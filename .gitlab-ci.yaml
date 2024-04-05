@@ -8,14 +8,8 @@ stages:
   - deploy
   - review
   - dast
-  - staging
-  - canary
-  - release
+  - release-img
   - production
-  - incremental rollout 10%
-  - incremental rollout 25%
-  - incremental rollout 50%
-  - incremental rollout 100%
   - performance
   - cleanup
 
@@ -32,7 +26,7 @@ test-override:
       when: always
 
 dockerhub-amd64:
-  stage: release
+  stage: release-img
   image: docker:latest
   services:
     - name: docker:dind
@@ -62,7 +56,7 @@ dockerhub-amd64:
       optional: false
 
 dockerhub-arm64:
-  stage: release
+  stage: release-img
   image: docker:latest
   services:
     - name: docker:dind
