@@ -105,3 +105,8 @@ dockerhub-arm64:
   needs:
     - job: dast
       optional: false
+
+test:
+  stage: test
+  rules:
+    - when: never
