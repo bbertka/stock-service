@@ -114,7 +114,7 @@ dockerhub-arm64:
 
 
 create_tag:
-  stage: release-images
+  stage: pytest
   image: docker:latest
   services:
     - name: docker:dind
