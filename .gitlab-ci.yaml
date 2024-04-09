@@ -114,24 +114,27 @@ dockerhub-arm64:
 
 
 create_tag:
-  stage: pytest
-  image: alpine/git  # An Alpine-based image with Git installed
+  stage: release-images
+  image: docker:latest
+  services:
+    - name: docker:dind
+      alias: docker
+  variables:
+    GIT_STRATEGY: clone  # Ensures a full clone for tagging purposes
   before_script:
-    - apk update && apk add --no-cache bash
-  script:
+    - apk add --no-cache git  # Ensure Git is installed (if needed)
     - git config --global user.email "bbertka@gmail.com"
     - git config --global user.name "Ben Bertka"
+  script:
     - git fetch --tags
     - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
     - IFS='.' read -ra ADDR <<< "${latest_tag//v/}"
     - new_patch_version=$((${ADDR[2]} + 1))
     - new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version"
     - echo "New tag will be $new_tag"
-    - git tag $new_tag
-    - git push origin $new_tag
+    #- git tag $new_tag
+    #- git push origin $new_tag
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
       when: always
     - when: never # Aviod running in other branches
-  variables:
-    GIT_STRATEGY: fetch
