@@ -126,14 +126,12 @@ create_tag:
     - git config --global user.email "bbertka@gmail.com"
     - git config --global user.name "Ben Bertka"
   script:
-    - git fetch --tags
     - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-    - IFS='.' read -ra ADDR <<< "${latest_tag//v/}"
-    - new_patch_version=$((${ADDR[2]} + 1))
+    - echo $latest_tag > latest_tag.txt
+    - IFS='.' read -ra ADDR < latest_tag.txt
+    - new_patch_version=$((${ADDR[2]#v} + 1))
     - new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version"
     - echo "New tag will be $new_tag"
-    #- git tag $new_tag
-    #- git push origin $new_tag
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
       when: always
