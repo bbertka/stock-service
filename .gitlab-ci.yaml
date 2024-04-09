@@ -11,6 +11,7 @@ stages:
   - dast
   - staging
   - canary
+  - tag
   - release-images
   - production
   - incremental rollout 10%
@@ -112,18 +113,25 @@ dockerhub-arm64:
       optional: false
 
 
-gitlab-amd64:
+create_tag:
   stage: pytest
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  image: alpine/git  # An Alpine-based image with Git installed
+  before_script:
+    - apk update && apk add --no-cache bash
   script:
     - git config --global user.email "bbertka@gmail.com"
     - git config --global user.name "Ben Bertka"
+    - git fetch --tags
     - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
     - IFS='.' read -ra ADDR <<< "${latest_tag//v/}"
     - new_patch_version=$((${ADDR[2]} + 1))
     - new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version"
     - echo "New tag will be $new_tag"
+    - git tag $new_tag
+    - git push origin $new_tag
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
       when: always
     - when: never # Aviod running in other branches
+  variables:
+    GIT_STRATEGY: fetch
