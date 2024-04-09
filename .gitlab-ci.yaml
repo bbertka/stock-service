@@ -11,8 +11,8 @@ stages:
   - dast
   - staging
   - canary
-  - tag
-  - release-images
+  - internal-release
+  - external-release
   - production
   - incremental rollout 10%
   - incremental rollout 25%
@@ -53,7 +53,7 @@ test:
     - when: never
 
 dockerhub-amd64:
-  stage: release-images
+  stage: external-release
   image: docker:latest
   services:
     - name: docker:dind
@@ -83,7 +83,7 @@ dockerhub-amd64:
       optional: false
 
 dockerhub-arm64:
-  stage: release-images
+  stage: external-release
   image: docker:latest
   services:
     - name: docker:dind
@@ -113,8 +113,8 @@ dockerhub-arm64:
       optional: false
 
 
-create_tag:
-  stage: pytest
+tag-and-release:
+  stage: internal-release
   image: docker:latest
   services:
     - name: docker:dind
@@ -129,14 +129,28 @@ create_tag:
   script:
     - |
       bash -c '
+      # Determine the latest tag and prepare the new tag
       latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1));
       echo "Latest tag: $latest_tag";
       IFS="." read -ra ADDR <<< "${latest_tag#v}";
       new_patch_version=$((ADDR[2] + 1));
       new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
       echo "New tag will be $new_tag";
+
+      # Create and push the new tag
+      git tag $new_tag;
+      git push origin $new_tag;
+
+      # Log in to Docker registry
+      echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
+
+      # Build and push the Docker images
+      docker build -t $CI_REGISTRY_IMAGE:$new_tag -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
+      docker push $CI_REGISTRY_IMAGE:$new_tag;
+      docker push $CI_REGISTRY_IMAGE:latest;
       '
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
-      when: always
-    - when: never # Avoid running in other branches
+  only:
+    - main
+  needs:
+    - job: dast
+      optional: false
