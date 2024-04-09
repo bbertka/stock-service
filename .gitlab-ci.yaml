@@ -131,11 +131,10 @@ create_tag:
       bash -c '
       latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1));
       echo "Latest tag: $latest_tag";
-      IFS="." read -ra ADDR <<< "$latest_tag";
+      IFS="." read -ra ADDR <<< "${latest_tag#v}";
       new_patch_version=$((ADDR[2] + 1));
       new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
       echo "New tag will be $new_tag";
-      '
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
       when: always
