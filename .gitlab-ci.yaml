@@ -11,7 +11,7 @@ stages:
   - dast
   - staging
   - canary
-  - release-imgages
+  - release-images
   - production
   - incremental rollout 10%
   - incremental rollout 25%
@@ -46,8 +46,13 @@ pysec-tests:
       when: always
     - when: never # Aviod running in other branches
 
+test:
+  stage: test
+  rules:
+    - when: never
+
 dockerhub-amd64:
-  stage: release-imgages
+  stage: release-images
   image: docker:latest
   services:
     - name: docker:dind
@@ -77,7 +82,7 @@ dockerhub-amd64:
       optional: false
 
 dockerhub-arm64:
-  stage: release-imgages
+  stage: release-images
   image: docker:latest
   services:
     - name: docker:dind
@@ -106,7 +111,22 @@ dockerhub-arm64:
     - job: dast
       optional: false
 
-test:
-  stage: test
+
+gitlab-amd64:
+  stage: pytest
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  only:
+    - main
+  script:
+    - git config --global user.email "bbertka@gmail.com"
+    - git config --global user.name "Ben Bertka"
+    - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+    - IFS='.' read -ra ADDR <<< "${latest_tag//v/}"
+    - new_patch_version=$((${ADDR[2]} + 1))
+    - new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version"
+    - echo "New tag will be $new_tag"
   rules:
-    - when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
+      when: always
+    - when: never # Aviod running in other branches
+
