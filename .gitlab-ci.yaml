@@ -149,7 +149,7 @@ dockerhub-amd64:
   only:
     - main
   needs:
-    - job: create-release:
+    - job: create-release
       optional: false
 
 dockerhub-arm64:
@@ -181,5 +181,5 @@ dockerhub-arm64:
   only:
     - main
   needs:
-    - job: create-release:
+    - job: create-release
       optional: false
