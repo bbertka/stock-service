@@ -135,6 +135,7 @@ create_tag:
       new_patch_version=$((ADDR[2] + 1));
       new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
       echo "New tag will be $new_tag";
+      '
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^feature/'  # This runs on branches starting with 'feature/'
       when: always
