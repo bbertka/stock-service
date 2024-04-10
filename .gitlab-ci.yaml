@@ -105,8 +105,8 @@ build-image:
     - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
     - echo "Latest tag is $LATEST_TAG";
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
-    - docker build -t $CI_REGISTRY_IMAGE:$NEW_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
-    - docker push $CI_REGISTRY_IMAGE:$NEW_TAG;
+    - docker build -t $CI_REGISTRY_IMAGE:$LATEST_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
+    - docker push $CI_REGISTRY_IMAGE:$LATEST_TAG;
     - docker push $CI_REGISTRY_IMAGE:latest;
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -140,10 +140,15 @@ release-dockerhub-amd64:
     DOCKER_REGISTRY: "docker.io"
     DOCKER_CLI_EXPERIMENTAL: "enabled"
     DOCKER_HOST: tcp://docker:2375
-    DOCKER_IMAGE_NAME: "$DOCKER_USERNAME/stock-flask-app"
+    DOCKER_IMAGE_NAME: "$DOCKER_USERNAME/stock-service"
     DOCKER_BASE_TAG: "latest"
     DOCKER_FILE: "Dockerfile"
+    GIT_STRATEGY: clone  # Ensures a full clone for tagging purposes
   before_script:
+    - apk update && apk add --no-cache openssh-client bash git
+    - git fetch --tags
+    - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
+    - echo "Latest tag is $LATEST_TAG";
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $DOCKER_REGISTRY --password-stdin
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
@@ -152,6 +157,7 @@ release-dockerhub-amd64:
       docker buildx build
       --platform linux/amd64
       -t $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$DOCKER_BASE_TAG
+      -t $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$LATEST_TAG
       -f $DOCKER_FILE
       --push .
   only:
@@ -170,10 +176,15 @@ release-dockerhub-arm64:
     DOCKER_REGISTRY: "docker.io"
     DOCKER_CLI_EXPERIMENTAL: "enabled"
     DOCKER_HOST: tcp://docker:2375
-    DOCKER_IMAGE_NAME: "$DOCKER_USERNAME/stock-flask-app"
+    DOCKER_IMAGE_NAME: "$DOCKER_USERNAME/stock-service"
     DOCKER_BASE_TAG: "latest-arm64"
     DOCKER_FILE: "Dockerfile"
+    GIT_STRATEGY: clone  # Ensures a full clone for tagging purposes
   before_script:
+    - apk update && apk add --no-cache openssh-client bash git
+    - git fetch --tags
+    - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
+    - echo "Latest tag is $LATEST_TAG";
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $DOCKER_REGISTRY --password-stdin
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
@@ -182,6 +193,7 @@ release-dockerhub-arm64:
       docker buildx build
       --platform linux/arm64
       -t $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$DOCKER_BASE_TAG
+      -t $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${LATEST_TAG}-arm64
       -f $DOCKER_FILE
       --push .
   only:
