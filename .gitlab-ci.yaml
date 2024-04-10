@@ -66,15 +66,16 @@ create-tag:
     - git fetch --tags
   script:
     - >
-      latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-      echo "Latest tag: $latest_tag"
-      IFS="." read -ra ADDR <<< "${latest_tag#v}"  # Properly split the version number
-      new_patch_version=$((ADDR[2] + 1))
-      new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version"
-      echo "New tag will be $new_tag"
-      git tag $new_tag
-      git push origin $new_tag
-      echo "NEW_TAG=$new_tag" > build.env
+      set -e;  # Exit script on first error
+      latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`);
+      echo "Latest tag: $latest_tag";
+      IFS="." read -ra ADDR <<< "${latest_tag#v}";
+      new_patch_version=$((ADDR[2] + 1));
+      new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
+      echo "New tag will be $new_tag";
+      git tag $new_tag;
+      git push origin $new_tag;
+      echo "NEW_TAG=$new_tag" > build.env;
   artifacts:
     paths:
       - build.env
