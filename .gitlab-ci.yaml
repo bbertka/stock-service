@@ -76,6 +76,8 @@ create-tag:
       git tag $new_tag;
       git push origin $new_tag;
       echo "NEW_TAG=$new_tag" > build.env;
+      echo "NEW_TAG is: $NEW_TAG";
+      if [ -z "$NEW_TAG" ]; then echo "NEW_TAG is not set"; exit 1; fi
   artifacts:
     paths:
       - build.env
@@ -91,13 +93,11 @@ build-image:
     - create-tag
   before_script:
     - if [ -f build.env ]; then source build.env; fi
-    - >
-      echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY 
-      -u $CI_REGISTRY_USER --password-stdin
+    - echo "Using NEW_TAG $NEW_TAG"
+    - if [ -z "$NEW_TAG" ]; then echo "NEW_TAG is not set"; exit 1; fi
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
   script:
-    - >
-      docker build -t $CI_REGISTRY_IMAGE:$NEW_TAG
-      -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .
+    - docker build -t $CI_REGISTRY_IMAGE:$NEW_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .
     - docker push $CI_REGISTRY_IMAGE:$NEW_TAG
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
@@ -112,10 +112,10 @@ create-release:
     - build-image
   before_script:
     - if [ -f build.env ]; then source build.env; fi
+    - echo "Using NEW_TAG $NEW_TAG"
+    - if [ -z "$NEW_TAG" ]; then echo "NEW_TAG is not set"; exit 1; fi
   script:
-    - >
-      release-cli create --name "$NEW_TAG" --tag-name "$NEW_TAG" 
-      --description "Automated release for $NEW_TAG" --ref "$NEW_TAG"
+    - release-cli create --name "$NEW_TAG" --tag-name "$NEW_TAG" --description "Automated release for $NEW_TAG" --ref "$NEW_TAG"
   only:
     - main
   needs:
@@ -135,9 +135,7 @@ dockerhub-amd64:
     DOCKER_BASE_TAG: "latest"
     DOCKER_FILE: "Dockerfile"
   before_script:
-    - >
-      echo "$DOCKER_PASSWORD" | docker login 
-      -u "$DOCKER_USERNAME" $DOCKER_REGISTRY --password-stdin
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $DOCKER_REGISTRY --password-stdin
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
   script:
@@ -167,9 +165,7 @@ dockerhub-arm64:
     DOCKER_BASE_TAG: "latest-arm64"
     DOCKER_FILE: "Dockerfile"
   before_script:
-    - >
-      echo "$DOCKER_PASSWORD" | docker login 
-      -u "$DOCKER_USERNAME" $DOCKER_REGISTRY --password-stdin
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $DOCKER_REGISTRY --password-stdin
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
   script:
