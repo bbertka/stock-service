@@ -53,7 +53,7 @@ test:
     - when: never
 
 create-tag-build:
-  stage: pytest
+  stage: release
   image: docker:latest
   services:
     - name: docker:dind
@@ -89,10 +89,13 @@ create-tag-build:
       docker push $CI_REGISTRY_IMAGE:latest;
       '
   only:
-    - feature
+    - main
+  needs:
+    - job: dast
+      optional: false
 
-create-release:
-  stage: pytest
+release-gitlab-amd64:
+  stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   before_script:
     - apk update && apk add --no-cache openssh-client bash git
@@ -105,7 +108,7 @@ create-release:
     - job: create-tag-build
       optional: false
   only:
-    - feature
+    - main
 
 
 
