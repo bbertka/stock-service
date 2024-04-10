@@ -65,15 +65,19 @@ create-tag:
     - git config --global user.name "Ben Bertka"
     - git fetch --tags
   script:
-    - set -e;  # Exit script on first error
-    - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`);
-    - echo "Latest tag is $latest_tag";
-    - IFS=' ' read -ra ADDR <<< $(echo "${latest_tag#v}" | awk -F"." '{print $1, $2, $3}');
-    - new_patch_version=$((ADDR[2] + 1));
-    - new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
-    - echo "New tag will be $new_tag";
-    - git tag $new_tag;
-    - git push origin $new_tag;
+    - set -e  # Exit on first error
+    - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
+    - echo "Latest tag is $latest_tag"
+    - |
+      version_string="${latest_tag#v}"
+      major=$(echo $version_string | cut -d'.' -f1)
+      minor=$(echo $version_string | cut -d'.' -f2)
+      patch=$(echo $version_string | cut -d'.' -f3)
+      new_patch_version=$((patch + 1))
+      new_tag="v$major.$minor.$new_patch_version"
+      echo "New tag will be $new_tag"
+    - git tag $new_tag
+    - git push origin $new_tag
   only:
     - main
 
