@@ -65,22 +65,15 @@ create-tag:
     - git config --global user.name "Ben Bertka"
     - git fetch --tags
   script:
-    - >
-      set -e;  # Exit script on first error
-      latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`);
-      echo "Latest tag: $latest_tag";
-      IFS="." read -ra ADDR <<< "${latest_tag#v}";
-      new_patch_version=$((ADDR[2] + 1));
-      new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
-      echo "New tag will be $new_tag";
-      git tag $new_tag;
-      git push origin $new_tag;
-      echo "NEW_TAG=$new_tag" > build.env;
-      echo "NEW_TAG is: $NEW_TAG";
-      if [ -z "$NEW_TAG" ]; then echo "NEW_TAG is not set"; exit 1; fi
-  artifacts:
-    paths:
-      - build.env
+    - set -e;  # Exit script on first error
+    - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`);
+    - echo "Latest tag is $latest_tag";
+    - IFS="." read -ra ADDR <<< "${latest_tag#v}";
+    - new_patch_version=$((ADDR[2] + 1));
+    - new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
+    - echo "New tag will be $new_tag";
+    - git tag $new_tag;
+    - git push origin $new_tag;
   only:
     - main
 
@@ -89,16 +82,20 @@ build-image:
   image: docker:latest
   services:
     - docker:dind
-  dependencies:
-    - create-tag
+  variables:
+    GIT_STRATEGY: clone
   before_script:
-    - if [ -f build.env ]; then source build.env; fi
-    - echo "Using NEW_TAG $NEW_TAG"
-    - if [ -z "$NEW_TAG" ]; then echo "NEW_TAG is not set"; exit 1; fi
+    - apk add --no-cache bash git
+    - git config --global user.email "bbertka@gmail.com"
+    - git config --global user.name "Ben Bertka"
+    - git fetch --tags
+    - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`);
+    - echo "Latest tag $latest_tag";
+    - if [ -z "$latest_tag" ]; then echo "latest_tag is not set"; exit 1; fi
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
   script:
-    - docker build -t $CI_REGISTRY_IMAGE:$NEW_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE:$NEW_TAG
+    - docker build -t $CI_REGISTRY_IMAGE:$latest_tag -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:$latest_tag
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     - main
@@ -111,11 +108,15 @@ create-release:
   dependencies:
     - build-image
   before_script:
-    - if [ -f build.env ]; then source build.env; fi
-    - echo "Using NEW_TAG $NEW_TAG"
-    - if [ -z "$NEW_TAG" ]; then echo "NEW_TAG is not set"; exit 1; fi
+    - apk add --no-cache bash git
+    - git config --global user.email "bbertka@gmail.com"
+    - git config --global user.name "Ben Bertka"
+    - git fetch --tags
+    - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`);
+    - echo "Latest tag $latest_tag";
+    - if [ -z "$latest_tag" ]; then echo "latest_tag is not set"; exit 1; fi
   script:
-    - release-cli create --name "$NEW_TAG" --tag-name "$NEW_TAG" --description "Automated release for $NEW_TAG" --ref "$NEW_TAG"
+    - release-cli create --name "$latest_tag" --tag-name "$latest_tag" --description "Automated release for $latest_tag" --ref "$latest_tag"
   only:
     - main
   needs:
