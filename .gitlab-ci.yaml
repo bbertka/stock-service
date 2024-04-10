@@ -53,7 +53,7 @@ test:
     - when: never
 
 release-gitlab:
-  stage: release
+  stage: pytest
   image: docker:latest
   services:
     - name: docker:dind
@@ -83,10 +83,7 @@ release-gitlab:
       docker push $CI_REGISTRY_IMAGE:latest;
       '
   only:
-    - main
-  needs:
-    - job: dast
-      optional: false
+    - feature
 
 
 release-dockerhub-amd64:
