@@ -131,7 +131,7 @@ release:
       optional: false
 
 release-dockerhub-amd64:
-  stage: release
+  stage: release-version
   image: docker:latest
   services:
     - name: docker:dind
@@ -161,7 +161,7 @@ release-dockerhub-amd64:
       optional: false
 
 release-dockerhub-arm64:
-  stage: release
+  stage: release-version
   image: docker:latest
   services:
     - name: docker:dind
