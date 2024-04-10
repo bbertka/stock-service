@@ -12,7 +12,7 @@ stages:
   - dast
   - staging
   - canary
-  - release
+  - releases
   - production
   - incremental rollout 10%
   - incremental rollout 25%
@@ -52,8 +52,8 @@ test:
   rules:
     - when: never
 
-create-tag-build:
-  stage: release
+tag:
+  stage: releases
   image: docker:latest
   services:
     - name: docker:dind
@@ -83,10 +83,6 @@ create-tag-build:
       echo "New tag will be $NEW_TAG";
       git tag $NEW_TAG;
       git push origin $NEW_TAG;
-      echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
-      docker build -t $CI_REGISTRY_IMAGE:$NEW_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
-      docker push $CI_REGISTRY_IMAGE:$NEW_TAG;
-      docker push $CI_REGISTRY_IMAGE:latest;
       '
   only:
     - main
@@ -94,8 +90,32 @@ create-tag-build:
     - job: dast
       optional: false
 
-release-gitlab-amd64:
-  stage: release
+build:
+  stage: releases
+  image: docker:latest
+  services:
+    - name: docker:dind
+      alias: docker
+  variables:
+    GIT_STRATEGY: clone  # Ensures a full clone for tagging purposes
+  before_script:
+    - apk update && apk add --no-cache openssh-client bash git
+    - git fetch --tags
+  script:
+    - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
+    - echo "Latest tag is $LATEST_TAG";
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
+    - docker build -t $CI_REGISTRY_IMAGE:$NEW_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
+    - docker push $CI_REGISTRY_IMAGE:$NEW_TAG;
+    - docker push $CI_REGISTRY_IMAGE:latest;
+  needs:
+    - job: tag
+      optional: false
+  only:
+    - main
+
+release:
+  stage: releases
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   before_script:
     - apk update && apk add --no-cache openssh-client bash git
@@ -105,12 +125,10 @@ release-gitlab-amd64:
       - echo "Latest tag is $LATEST_TAG";
       - release-cli create --name "Release $LATEST_TAG" --tag-name "$LATEST_TAG" --description "Automated release for $LATEST_TAG" --ref "$LATEST_TAG";
   needs:
-    - job: create-tag-build
+    - job: build
       optional: false
   only:
     - main
-
-
 
 release-dockerhub-amd64:
   stage: release
@@ -141,7 +159,6 @@ release-dockerhub-amd64:
   needs:
     - job: dast
       optional: false
-
 
 release-dockerhub-arm64:
   stage: release
