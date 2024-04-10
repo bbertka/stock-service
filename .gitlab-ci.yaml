@@ -68,7 +68,7 @@ create-tag:
     - set -e;  # Exit script on first error
     - latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`);
     - echo "Latest tag is $latest_tag";
-    - IFS="." read -ra ADDR <<< "${latest_tag#v}";
+    - IFS=' ' read -ra ADDR <<< $(echo "${latest_tag#v}" | awk -F"." '{print $1, $2, $3}');
     - new_patch_version=$((ADDR[2] + 1));
     - new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
     - echo "New tag will be $new_tag";
