@@ -95,12 +95,9 @@ create-release:
   stage: pytest
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   script:
-    - |
-      bash -c '
-      LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
-      echo "Latest tag: $LATEST_TAG";
-      release-cli create --name "Release $LATEST_TAG" --tag-name "$LATEST_TAG" --description "Automated release for $LATEST_TAG" --ref "$LATEST_TAG";
-      '
+      - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
+      - echo "Latest tag is $LATEST_TAG";
+      - release-cli create --name "Release $LATEST_TAG" --tag-name "$LATEST_TAG" --description "Automated release for $LATEST_TAG" --ref "$LATEST_TAG";
   needs:
     - job: create-tag-build
       optional: false
