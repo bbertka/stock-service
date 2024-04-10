@@ -122,8 +122,9 @@ release-dockerhub-amd64:
   only:
     - main
   needs:
-    - job: create-release
+    - job: dast
       optional: false
+
 
 release-dockerhub-arm64:
   stage: release
@@ -152,5 +153,6 @@ release-dockerhub-arm64:
   only:
     - main
   needs:
-    - job: create-release
+    - job: dast
       optional: false
+
