@@ -68,22 +68,15 @@ release-gitlab:
   script:
     - |
       bash -c '
-      # Determine the latest tag and prepare the new tag
       latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1));
       echo "Latest tag: $latest_tag";
       IFS="." read -ra ADDR <<< "${latest_tag#v}";
       new_patch_version=$((ADDR[2] + 1));
       new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
       echo "New tag will be $new_tag";
-
-      # Create and push the new tag
       git tag $new_tag;
       git push origin $new_tag;
-
-      # Log in to Docker registry
       echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
-
-      # Build and push the Docker images
       docker build -t $CI_REGISTRY_IMAGE:$new_tag -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
       docker push $CI_REGISTRY_IMAGE:$new_tag;
       docker push $CI_REGISTRY_IMAGE:latest;
