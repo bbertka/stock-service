@@ -63,7 +63,7 @@ release-gitlab:
   before_script:
     - apk update && apk add --no-cache openssh-client bash git
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - echo $SSH_PRIVATE_KEY | base64 --decode | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
