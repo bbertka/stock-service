@@ -64,6 +64,7 @@ release-gitlab:
     - apk add --no-cache bash git  # Install Bash and Git
     - git config --global user.email "bbertka@gmail.com"
     - git config --global user.name "Ben Bertka"
+    - 'git config --global http.extraHeader "Authorization: Bearer ${GITLAB_TOKEN}"'
     - git fetch --tags
   script:
     - |
