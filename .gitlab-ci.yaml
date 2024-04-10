@@ -52,7 +52,7 @@ test:
   rules:
     - when: never
 
-release-gitlab:
+create-tag-build:
   stage: pytest
   image: docker:latest
   services:
@@ -75,21 +75,37 @@ release-gitlab:
   script:
     - |
       bash -c '
-      latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1));
-      echo "Latest tag: $latest_tag";
-      IFS="." read -ra ADDR <<< "${latest_tag#v}";
+      LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
+      echo "Latest tag: $LATEST_TAG";
+      IFS="." read -ra ADDR <<< "${LATEST_TAG#v}";
       new_patch_version=$((ADDR[2] + 1));
-      new_tag="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
-      echo "New tag will be $new_tag";
-      git tag $new_tag;
-      git push origin $new_tag;
+      NEW_TAG="v${ADDR[0]}.${ADDR[1]}.$new_patch_version";
+      echo "New tag will be $NEW_TAG";
+      git tag $NEW_TAG;
+      git push origin $NEW_TAG;
       echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
-      docker build -t $CI_REGISTRY_IMAGE:$new_tag -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
-      docker push $CI_REGISTRY_IMAGE:$new_tag;
+      docker build -t $CI_REGISTRY_IMAGE:$NEW_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
+      docker push $CI_REGISTRY_IMAGE:$NEW_TAG;
       docker push $CI_REGISTRY_IMAGE:latest;
       '
   only:
     - feature
+
+create-release:
+  stage: pytest
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+    - |
+      bash -c '
+      LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
+      echo "Latest tag: $LATEST_TAG";
+      release-cli create --name "Release $LATEST_TAG" --tag-name "$LATEST_TAG" \
+      --description "Automated release for $LATEST_TAG" --ref "$LATEST_TAG"
+  dependencies:
+    - create-tag-build
+  only:
+    - feature
+
 
 
 release-dockerhub-amd64:
