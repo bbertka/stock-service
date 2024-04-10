@@ -108,11 +108,11 @@ build:
     - docker build -t $CI_REGISTRY_IMAGE:$NEW_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
     - docker push $CI_REGISTRY_IMAGE:$NEW_TAG;
     - docker push $CI_REGISTRY_IMAGE:latest;
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
   needs:
     - job: tag
       optional: false
-  only:
-    - main
 
 release:
   stage: releases
@@ -124,11 +124,11 @@ release:
       - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
       - echo "Latest tag is $LATEST_TAG";
       - release-cli create --name "Release $LATEST_TAG" --tag-name "$LATEST_TAG" --description "Automated release for $LATEST_TAG" --ref "$LATEST_TAG";
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
   needs:
     - job: build
       optional: false
-  only:
-    - main
 
 release-dockerhub-amd64:
   stage: release
