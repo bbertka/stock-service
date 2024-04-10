@@ -12,7 +12,7 @@ stages:
   - dast
   - staging
   - canary
-  - release-version
+  - create-release
   - production
   - incremental rollout 10%
   - incremental rollout 25%
