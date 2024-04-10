@@ -99,10 +99,10 @@ create-release:
       bash -c '
       LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
       echo "Latest tag: $LATEST_TAG";
-      release-cli create --name "Release $LATEST_TAG" --tag-name "$LATEST_TAG" \
-      --description "Automated release for $LATEST_TAG" --ref "$LATEST_TAG"
-  dependencies:
-    - create-tag-build
+      release-cli create --name "Release $LATEST_TAG" --tag-name "$LATEST_TAG" --description "Automated release for $LATEST_TAG" --ref "$LATEST_TAG";
+  needs:
+    - job: create-tag-build
+      optional: false
   only:
     - feature
 
