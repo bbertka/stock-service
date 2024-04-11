@@ -98,16 +98,24 @@ build-image:
       alias: docker
   variables:
     GIT_STRATEGY: clone  # Ensures a full clone for tagging purposes
+    PUBLIC_REGISTRY: "docker.io"
+    PUBLIC_IMAGE: "bbertka/stock-service"
   before_script:
     - apk update && apk add --no-cache openssh-client bash git
     - git fetch --tags
   script:
     - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
     - echo "Latest tag is $LATEST_TAG";
+    # Internal repo image push
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
     - docker build -t $CI_REGISTRY_IMAGE:$LATEST_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .;
     - docker push $CI_REGISTRY_IMAGE:$LATEST_TAG;
     - docker push $CI_REGISTRY_IMAGE:latest;
+    # External repo image push
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $PUBLIC_REGISTRY --password-stdin;
+    - docker build -t $PUBLIC_REGISTRY/$PUBLIC_IMAGE:$LATEST_TAG -t $PUBLIC_REGISTRY/$PUBLIC_IMAGE:latest -f Dockerfile .;
+    - docker push $PUBLIC_REGISTRY/$PUBLIC_IMAGE:$LATEST_TAG;
+    - docker push $PUBLIC_REGISTRY/$PUBLIC_IMAGE:latest;
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   needs:
