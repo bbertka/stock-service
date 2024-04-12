@@ -2,6 +2,8 @@
 
 [![pipeline status](https://gitlab.com/sa-demo-group/ben-bertka-demo-group/stock-service/badges/main/pipeline.svg)](https://gitlab.com/sa-demo-group/ben-bertka-demo-group/stock-service/-/commits/main)
 
+Rollback Branch
+
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
