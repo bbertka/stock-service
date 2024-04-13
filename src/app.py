@@ -65,7 +65,8 @@ def ask():
 
 @app.route('/chat')
 def chat():
-    return render_template('chat.html')
+    version = os.getenv('SOFTWARE_VERSION', 'v0.0.0')
+    return render_template('index.html', version=version)
 
 
 @app.route('/')

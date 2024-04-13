@@ -22,6 +22,13 @@
         .form-inline .btn {
             width: 20%; /* Responsive width */
         }
+        footer {
+            text-align: center; /* Center the footer text */
+            padding: 20px 0; /* Padding for aesthetics */
+            font-size: 0.9em; /* Smaller font size */
+            width: 100%; /* Ensure full width */
+            color: #666; /* Color for the footer text */
+        }
     </style>
 </head>
 <body>
@@ -35,6 +42,9 @@
                     <input type="text" id="userInput" class="form-control mr-sm-2" placeholder="Enter stock ticker symbol (e.g., AAPL)">
                     <button type="button" onclick="ask()" class="btn btn-primary">Send</button>
                 </form>
+                <footer>
+                    Version: {{ version }} <!-- Dynamically display the version number -->
+                </footer>
             </div>
         </div>
     </div>

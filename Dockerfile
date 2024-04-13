@@ -4,6 +4,12 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
+# Define a build-time argument for the software version
+ARG SOFTWARE_VERSION=latest
+
+# Set it as an environment variable that the Flask app can access
+ENV SOFTWARE_VERSION=$SOFTWARE_VERSION
+
 # Copy only the requirements first to leverage Docker cache
 COPY requirements.txt .
 
@@ -12,8 +18,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the Flask application files into the container
 COPY src/ .
-COPY src/templates/ ./templates
-
 
 # Expose the port that the Flask application runs on
 EXPOSE 5000
