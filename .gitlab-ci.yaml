@@ -116,6 +116,8 @@ build-image:
     - docker buildx create --name mybuilder --use;
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $PUBLIC_REGISTRY --password-stdin;
     - docker buildx build --platform linux/amd64,linux/arm64 -t $PUBLIC_REGISTRY/$PUBLIC_IMAGE:$LATEST_TAG -t $PUBLIC_REGISTRY/$PUBLIC_IMAGE:latest --build-arg SOFTWARE_VERSION=$LATEST_TAG -f Dockerfile --push .;
+    - docker pull $CI_REGISTRY_IMAGE:$LATEST_TAG';
+    - docker run --rm $CI_REGISTRY_IMAGE:$LATEST_TAG env | grep SOFTWARE_VERSION';
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   needs:
