@@ -25,28 +25,42 @@ def get_stock_price(symbol):
 
 @app.route('/stock-price', methods=['GET'])
 def stock_price():
-    stock_symbol = request.args.get('symbol').upper()
+    stock_symbol = request.args.get('symbol')
+    if not stock_symbol:
+        return jsonify({"error": "No stock symbol provided. Please include a 'symbol' query parameter."}), 400
+    stock_symbol = stock_symbol.upper()
     pattern = r'^[A-Z0-9][A-Z0-9.]{0,7}[A-Z0-9]$'
     if not re.match(pattern, stock_symbol):
         return jsonify({"error": "Invalid stock symbol. Valid examples: AAPL, GOOGL, MSFT2."}), 400
-    price = get_stock_price(stock_symbol)
-    if price:
-        return jsonify({'symbol': stock_symbol, 'price': price}), 200
-    else:
-        return jsonify({'error': 'Stock symbol not found or no price available.'}), 404
+    try:
+        price = get_stock_price(stock_symbol)
+        if price is not None:
+            return jsonify({'symbol': stock_symbol, 'price': price}), 200
+        else:
+            return jsonify({'error': 'Stock symbol not found or no price available.'}), 404
+    except Exception as e:
+        print(f"Error retrieving stock price for {stock_symbol}: {str(e)}")
+        return jsonify({'error': 'Internal server error when retrieving stock price.'}), 500
 
 
 @app.route('/ask', methods=['POST'])
 def ask():
-    stock_symbol = request.form.get('stock_symbol', '').upper() 
+    stock_symbol = request.form.get('stock_symbol', '')
+    if not stock_symbol:
+        return jsonify({"error": "No stock symbol provided. Please include a 'symbol' query parameter."}), 400
+    stock_symbol = stock_symbol.upper()
     pattern = r'^[A-Z0-9][A-Z0-9.]{0,7}[A-Z0-9]$'
     if not re.match(pattern, stock_symbol):
         return jsonify({"error": "Invalid stock symbol. Valid examples: AAPL, GOOGL, MSFT2."}), 400
-    price = get_stock_price(stock_symbol)
-    if price:
-        return jsonify({'symbol': stock_symbol, 'price': price}), 200
-    else:
-        return jsonify({'error': 'Stock symbol not found or no price available.'}), 404
+    try:
+        price = get_stock_price(stock_symbol)
+        if price is not None:
+            return jsonify({'symbol': stock_symbol, 'price': price}), 200
+        else:
+            return jsonify({'error': 'Stock symbol not found or no price available.'}), 404
+    except Exception as e:
+        print(f"Error retrieving stock price for {stock_symbol}: {str(e)}")
+        return jsonify({'error': 'Internal server error when retrieving stock price.'}), 500
 
 
 @app.route('/chat')
