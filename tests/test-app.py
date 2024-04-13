@@ -24,7 +24,7 @@ class TestStockService(TestCase):
         # Test the stock price endpoint with no symbol
         response = self.client.get('/stock-price')
         self.assertEqual(response.status_code, 400)
-        self.assertIn(b"Failed to retrieve the price.", response.data)
+        self.assertIn(b"No stock symbol provided.", response.data)
 
 # Allows running the tests via the command line
 if __name__ == '__main__':
