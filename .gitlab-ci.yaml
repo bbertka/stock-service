@@ -106,7 +106,7 @@ build-image:
   script:
     - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
     - echo "Latest tag is $LATEST_TAG";
-    - sleep 15. #Wait for a time to allow GitLab tags to populate
+    - sleep 15; #Wait for a time to allow GitLab tags to populate
     # Internal repo image push
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
     - docker build -t $CI_REGISTRY_IMAGE:$LATEST_TAG -t $CI_REGISTRY_IMAGE:latest --build-arg SOFTWARE_VERSION=$LATEST_TAG -f Dockerfile .;
