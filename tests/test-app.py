@@ -23,7 +23,7 @@ class TestStockService(TestCase):
     def test_stock_price_no_symbol(self):
         # Test the stock price endpoint with no symbol
         response = self.client.get('/stock-price')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
         self.assertIn(b"Failed to retrieve the price.", response.data)
 
 # Allows running the tests via the command line
