@@ -106,6 +106,7 @@ build-image:
   script:
     - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1));
     - echo "Latest tag is $LATEST_TAG";
+    - sleep 15. #Wait for a time to allow GitLab tags to populate
     # Internal repo image push
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin;
     - docker build -t $CI_REGISTRY_IMAGE:$LATEST_TAG -t $CI_REGISTRY_IMAGE:latest --build-arg SOFTWARE_VERSION=$LATEST_TAG -f Dockerfile .;
@@ -116,6 +117,7 @@ build-image:
     - docker buildx create --name mybuilder --use;
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $PUBLIC_REGISTRY --password-stdin;
     - docker buildx build --platform linux/amd64,linux/arm64 -t $PUBLIC_REGISTRY/$PUBLIC_IMAGE:$LATEST_TAG -t $PUBLIC_REGISTRY/$PUBLIC_IMAGE:latest --build-arg SOFTWARE_VERSION=$LATEST_TAG -f Dockerfile --push .;
+    # Testing to see if GitLab images hold the Build-arg Software Version
     - docker pull $CI_REGISTRY_IMAGE:$LATEST_TAG';
     - docker run --rm $CI_REGISTRY_IMAGE:$LATEST_TAG env | grep SOFTWARE_VERSION';
   rules:
