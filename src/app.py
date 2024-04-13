@@ -71,7 +71,7 @@ def chat():
 
 @app.route('/')
 def home():
-    return "Hello GitLab!"
+    return ("Hello GitLab!\nSoftware version: %s" % os.getenv('SOFTWARE_VERSION') )
 
 
 if __name__ == "__main__":
