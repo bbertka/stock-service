@@ -11,7 +11,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the Flask application files into the container
-COPY src/app.py .
+COPY src/ .
+COPY src/templates/ ./templates
+
 
 # Expose the port that the Flask application runs on
 EXPOSE 5000
