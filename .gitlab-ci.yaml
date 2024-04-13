@@ -112,8 +112,8 @@ build-image:
     - docker push $CI_REGISTRY_IMAGE:$LATEST_TAG;
     - docker push $CI_REGISTRY_IMAGE:latest;
     # External multi-arch repo image push
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    - docker buildx create --name mybuilder --use
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes;
+    - docker buildx create --name mybuilder --use;
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" $PUBLIC_REGISTRY --password-stdin;
     - docker buildx build --platform linux/amd64,linux/arm64 -t $PUBLIC_REGISTRY/$PUBLIC_IMAGE:$LATEST_TAG -t $PUBLIC_REGISTRY/$PUBLIC_IMAGE:latest --build-arg SOFTWARE_VERSION=$LATEST_TAG -f Dockerfile --push .;
   rules:
