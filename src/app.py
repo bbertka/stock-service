@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request, render_template
 import yfinance as yf
 import os, re
 
-app = Flask(__name__, template_folder=os.getcwd()+'/templates')
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 
 def get_stock_price(symbol):
     try:
